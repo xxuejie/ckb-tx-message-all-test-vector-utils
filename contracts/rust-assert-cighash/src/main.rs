@@ -44,7 +44,10 @@ impl io::Write for Hasher {
 
 pub fn program_entry() -> i8 {
     let mut hasher = Hasher::default();
-    generate_cighash_all(&mut hasher).expect("generate CIGHASH_ALL!");
+    if let Err(e) = generate_cighash_all(&mut hasher) {
+        ckb_std::debug!("Generate CIGHASH_ALL encounters error: {:?}", e);
+        return 99;
+    }
     let hash = hasher.hash();
 
     let first_witness_data =

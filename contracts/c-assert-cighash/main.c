@@ -17,7 +17,7 @@ int main() {
   int err = cighash_all_generate(write_to_blake2b, &state);
   if (err != 0) {
     ckb_printf("CIGHASH_ALL encounters error: %d\n", err);
-    return err;
+    return 99;
   }
 
   uint8_t first_witness_buffer[MOL2_DATA_SOURCE_LEN(WITNESS_BUFFER_SIZE)];
