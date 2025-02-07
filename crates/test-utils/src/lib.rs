@@ -1,4 +1,6 @@
-use cighash_all_utils::cighash_all_from_mock_tx::{generate_cighash_all, ScriptOrIndex};
+use cighash_all_utils::cighash_all_from_mock_tx::{
+    generate_cighash_all_from_mock_tx, ScriptOrIndex,
+};
 use ckb_testtool::{
     ckb_hash::{new_blake2b, Blake2b},
     ckb_types::{
@@ -144,7 +146,7 @@ fn complete_and_sign_tx(
     let cighash = {
         let unsigned_mock_tx = context.dump_tx(&unsigned_tx).expect("dump tx");
         let mut hasher = Hasher::default();
-        generate_cighash_all(
+        generate_cighash_all_from_mock_tx(
             &unsigned_mock_tx.into(),
             ScriptOrIndex::Index(first_witness_index),
             &mut hasher,

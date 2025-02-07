@@ -1,6 +1,6 @@
 use ckb_gen_types::{
     bytes::Bytes,
-    packed::{CellOutput, Script, WitnessArgsReader},
+    packed::{CellOutput, Script, Transaction, WitnessArgsReader},
     prelude::*,
 };
 use ckb_mock_tx_types::MockTransaction;
@@ -34,17 +34,25 @@ pub enum ScriptOrIndex {
     Index(usize),
 }
 
-pub fn generate_cighash_all<W: io::Write>(
+pub fn generate_cighash_all_from_mock_tx<W: io::Write>(
     mock_tx: &MockTransaction,
     script_or_index: ScriptOrIndex,
     writer: &mut W,
 ) -> Result<(), CighashAllError> {
     let inputs = locate_inputs(mock_tx)?;
+    generate_cighash_all(&mock_tx.tx, &inputs, script_or_index, writer)
+}
+
+pub fn generate_cighash_all<W: io::Write>(
+    tx: &Transaction,
+    inputs: &[(CellOutput, Bytes)],
+    script_or_index: ScriptOrIndex,
+    writer: &mut W,
+) -> Result<(), CighashAllError> {
     let script_group_indices = find_script_group(&inputs, script_or_index)?;
 
     // Ensure the first witness of current script group is a WitnessArgs
-    let first_witness_content = mock_tx
-        .tx
+    let first_witness_content = tx
         .witnesses()
         .get(script_group_indices[0])
         .ok_or(CighashAllError::InvalidMockTx)?
@@ -52,7 +60,7 @@ pub fn generate_cighash_all<W: io::Write>(
     let first_witness = WitnessArgsReader::from_slice(&first_witness_content)?;
 
     // Hash tx hash
-    writer.write_all(mock_tx.tx.calc_tx_hash().as_slice())?;
+    writer.write_all(tx.calc_tx_hash().as_slice())?;
 
     // Hash contents of all input cells
     for (cell_output, data) in inputs {
@@ -69,7 +77,7 @@ pub fn generate_cighash_all<W: io::Write>(
 
     // Hash the remaining witnesses in current script group
     for i in script_group_indices.iter().skip(1) {
-        if let Some(witness) = mock_tx.tx.witnesses().get(*i).map(|w| w.raw_data()) {
+        if let Some(witness) = tx.witnesses().get(*i).map(|w| w.raw_data()) {
             write_length(witness.len(), writer)?;
             writer.write_all(&witness)?;
         }
