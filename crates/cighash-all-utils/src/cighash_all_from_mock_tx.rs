@@ -49,7 +49,7 @@ pub fn generate_cighash_all<W: io::Write>(
     script_or_index: ScriptOrIndex,
     writer: &mut W,
 ) -> Result<(), CighashAllError> {
-    let script_group_indices = find_script_group(&inputs, script_or_index)?;
+    let script_group_indices = find_script_group(inputs, script_or_index)?;
 
     // Ensure the first witness of current script group is a WitnessArgs
     let first_witness_content = tx
@@ -67,7 +67,7 @@ pub fn generate_cighash_all<W: io::Write>(
         writer.write_all(cell_output.as_slice())?;
 
         write_length(data.len(), writer)?;
-        writer.write_all(&data)?;
+        writer.write_all(data)?;
     }
 
     // Hash the first witness of current script group
