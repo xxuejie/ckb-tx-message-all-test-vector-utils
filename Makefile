@@ -79,6 +79,9 @@ clippy:
 
 fmt:
 	cargo fmt $(CARGO_ARGS)
+	@for contract in $(wildcard contracts/c-*); do \
+		$(MAKE) -e -C $$contract fmt; \
+	done; \
 
 # Arbitrary cargo command is supported here. For example:
 #
