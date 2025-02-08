@@ -1,3 +1,5 @@
+#define MOL2_EXIT ckb_exit
+
 #include <blake2b.h>
 
 #include "cighash_all.h"

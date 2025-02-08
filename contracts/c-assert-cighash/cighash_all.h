@@ -2,7 +2,6 @@
 #define CKB_CIGHASH_ALL_H_
 
 #include <ckb_syscalls.h>
-#define MOL2_EXIT ckb_exit
 
 #include "witness_args_lazy_utils.h"
 
