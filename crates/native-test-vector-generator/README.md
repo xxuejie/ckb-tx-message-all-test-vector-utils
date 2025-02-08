@@ -102,7 +102,7 @@ total 19M
 
 Each different file name minus the file extension part represents a different test case. For each test case, 2 or 3 files will be generated:
 
-* `.json` suffix: a JSON file containing mock transaction in a format that will be accepted by [ckb-debugger](https://github.com/xxuejie/ckb-standalone-debugger).
+* `.json` suffix: a JSON file containing mock transaction in a format that will be accepted by [ckb-debugger](https://github.com/nervosnetwork/ckb-standalone-debugger).
 * `.indices` suffix: a JSON file containing indices for input cells that use a `CIGHASH_ALL` validating lock
 * `.hash` suffix: an optional file, in the case a `CIGHASH_ALL` hash could be generated, this contains a 32-byte hash in hex notation, which is the `CIGHASH_ALL` generated from the JSON tx file of the same name, using the indices file of the same name as the specified script group, and using ckb flavored blake2b hash function as the hasher. In case a `CIGHASH_ALL` hash could not be generated(e.g., the first witness in current script group is not WitnessArgs structure), this file will be missing.
 
