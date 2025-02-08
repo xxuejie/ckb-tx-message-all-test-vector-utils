@@ -48,7 +48,9 @@ pub fn build_bare_tx(
     always_success_bin: Bytes,
     seed: u64,
 ) -> (Context, TransactionView) {
-    _build_bare_tx(contract_bin, always_success_bin, seed, 1, 5)
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    _build_bare_tx(contract_bin, always_success_bin, &mut rng, 1, 5)
 }
 
 /// Build a bare minimal transaction with 3 - 5 input cells
@@ -58,20 +60,159 @@ pub fn build_bare_tx_multiple_input_cells(
     always_success_bin: Bytes,
     seed: u64,
 ) -> (Context, TransactionView) {
-    _build_bare_tx(contract_bin, always_success_bin, seed, 3, 5)
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    _build_bare_tx(contract_bin, always_success_bin, &mut rng, 3, 5)
 }
 
-fn _build_bare_tx(
+/// Build a proper transaction with 3 - 5 input cells
+/// using provided lock, witness shall also be filled with real data
+pub fn build_tx_with_witness_data(
     contract_bin: Bytes,
     always_success_bin: Bytes,
     seed: u64,
+) -> (Context, TransactionView) {
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx_with_witness(
+        contract_bin,
+        always_success_bin,
+        &mut rng,
+        3,
+        5,
+        10,
+        200,
+    );
+
+    let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
+
+    (context, signed_tx)
+}
+
+/// Build a proper transaction with 2 - 4 input cells
+/// using provided lock, super large data will be used to test streaming APIs
+pub fn build_tx_with_super_large_data(
+    contract_bin: Bytes,
+    always_success_bin: Bytes,
+    seed: u64,
+) -> (Context, TransactionView) {
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx_with_witness(
+        contract_bin,
+        always_success_bin,
+        &mut rng,
+        2,
+        4,
+        70000,
+        300000,
+    );
+
+    // Modify some input cells with large data
+    {
+        let modified_count = rng.gen_range(1..=uncompleted_tx.inputs().len());
+
+        for cell_input in uncompleted_tx.inputs().into_iter().take(modified_count) {
+            let data_length = rng.gen_range(70000..=300000);
+            let data = random_data(&mut rng, data_length);
+
+            {
+                let pair = context
+                    .cells
+                    .get_mut(&cell_input.previous_output())
+                    .unwrap();
+                pair.1 = data;
+            }
+        }
+    }
+
+    let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
+
+    (context, signed_tx)
+}
+
+fn _build_bare_tx<R: Rng>(
+    contract_bin: Bytes,
+    always_success_bin: Bytes,
+    rng: &mut R,
     min_current_group_input_cells: usize,
     max_current_group_input_cells: usize,
 ) -> (Context, TransactionView) {
-    assert!(min_current_group_input_cells > 0);
+    let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx(
+        contract_bin,
+        always_success_bin,
+        rng,
+        min_current_group_input_cells,
+        max_current_group_input_cells,
+    );
 
-    // Setup rng
-    let mut rng = StdRng::seed_from_u64(seed);
+    let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
+
+    (context, signed_tx)
+}
+
+fn _build_bare_uncompleted_tx_with_witness<R: Rng>(
+    contract_bin: Bytes,
+    always_success_bin: Bytes,
+    rng: &mut R,
+    min_current_group_input_cells: usize,
+    max_current_group_input_cells: usize,
+    min_witness_length: usize,
+    max_witness_length: usize,
+) -> (Context, TransactionView, Vec<usize>) {
+    let (context, uncompleted_tx, indices) = _build_bare_uncompleted_tx(
+        contract_bin,
+        always_success_bin,
+        rng,
+        min_current_group_input_cells,
+        max_current_group_input_cells,
+    );
+
+    // Modify the tx to fill in witness data
+    let modified_tx = {
+        let generated_witness_count = uncompleted_tx.inputs().len() + rng.gen_range(1..=3);
+        let witnesses: Vec<_> = (0..generated_witness_count)
+            .map(|i| {
+                if i == indices[0] {
+                    let current_data = uncompleted_tx.witnesses().get(i).unwrap().raw_data();
+                    let current_witness_args = WitnessArgs::from_slice(&current_data).unwrap();
+
+                    let input_type_length = rng.gen_range(min_witness_length..=max_witness_length);
+                    let input_type = random_data(rng, input_type_length);
+                    let output_type_length = rng.gen_range(min_witness_length..=max_witness_length);
+                    let output_type = random_data(rng, output_type_length);
+
+                    current_witness_args
+                        .as_builder()
+                        .input_type(Some(input_type).pack())
+                        .output_type(Some(output_type).pack())
+                        .build()
+                        .as_bytes()
+                } else {
+                    let length = rng.gen_range(min_witness_length..=max_witness_length);
+                    random_data(rng, length)
+                }
+            })
+            .map(|b| b.pack())
+            .collect();
+
+        uncompleted_tx
+            .as_advanced_builder()
+            .set_witnesses(witnesses)
+            .build()
+    };
+
+    (context, modified_tx, indices)
+}
+
+fn _build_bare_uncompleted_tx<R: Rng>(
+    contract_bin: Bytes,
+    always_success_bin: Bytes,
+    rng: &mut R,
+    min_current_group_input_cells: usize,
+    max_current_group_input_cells: usize,
+) -> (Context, TransactionView, Vec<usize>) {
+    assert!(min_current_group_input_cells > 0);
 
     let mut context = Context::new_with_deterministic_rng();
     let out_point = context.deploy_cell(contract_bin);
@@ -88,14 +229,14 @@ fn _build_bare_tx(
     // prepare cells
     let mut inputs = vec![];
     for _ in 0..rng.gen_range(min_current_group_input_cells..=max_current_group_input_cells) {
-        let input = build_input_cell(&mut context, &mut rng, &lock_script, 0, 200, 200, 100000);
+        let input = build_input_cell(&mut context, rng, &lock_script, 0, 200, 200, 100000);
 
         inputs.push((input, true));
     }
-    for _ in 0..rng.gen_range(1..=8) {
+    for _ in 0..rng.gen_range(1..=6) {
         let input = build_input_cell(
             &mut context,
-            &mut rng,
+            rng,
             &always_success_script,
             0,
             150,
@@ -105,19 +246,25 @@ fn _build_bare_tx(
 
         inputs.push((input, false));
     }
-    inputs.shuffle(&mut rng);
+    inputs.shuffle(rng);
 
     let mut outputs = vec![];
     let mut outputs_data = vec![];
     for _ in 0..rng.gen_range(3..=6) {
-        let (output, data) = build_output_cell(&mut rng, &lock_script, 0, 300, 2000, 30000);
+        let (output, data) = build_output_cell(rng, &lock_script, 0, 300, 2000, 30000);
 
         outputs.push(output);
         outputs_data.push(data);
     }
 
     // Prepare just enough witness
-    let first_witness_index = inputs.iter().position(|(_, f)| *f).unwrap();
+    let indices: Vec<_> = inputs
+        .iter()
+        .enumerate()
+        .filter(|(_, (_, f))| *f)
+        .map(|(i, _)| i)
+        .collect();
+    let first_witness_index = indices[0];
     let mut witnesses = vec![Bytes::new(); first_witness_index + 1];
     witnesses[first_witness_index] = WitnessArgs::new_builder()
         .lock(Some(Bytes::from(vec![0u8; 32])).pack())
@@ -133,7 +280,7 @@ fn _build_bare_tx(
         .build();
     let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, first_witness_index);
 
-    (context, signed_tx)
+    (context, signed_tx, indices)
 }
 
 fn complete_and_sign_tx(
@@ -157,7 +304,10 @@ fn complete_and_sign_tx(
 
     // Use cighash to replace the placeholder part in unsigned transaction
     let mut witnesses: Vec<_> = unsigned_tx.witnesses().into_iter().collect();
-    witnesses[first_witness_index] = WitnessArgs::new_builder()
+    let first_witness =
+        WitnessArgs::from_slice(&witnesses[first_witness_index].raw_data()).unwrap();
+    witnesses[first_witness_index] = first_witness
+        .as_builder()
         .lock(Some(Bytes::from(cighash.to_vec())).pack())
         .build()
         .as_bytes()
@@ -178,9 +328,7 @@ fn build_input_cell<R: Rng>(
     max_capacity_bytes: usize,
 ) -> CellInput {
     let data_length = rng.gen_range(min_data_length..=max_data_length);
-    let mut data = vec![0u8; data_length];
-    rng.fill(&mut data[..]);
-    let data: Bytes = data.into();
+    let data = random_data(rng, data_length);
 
     let capacity = (data_length + rng.gen_range(min_capacity_bytes..=max_capacity_bytes))
         * 100_000_000
@@ -222,4 +370,10 @@ fn build_output_cell<R: Rng>(
             .build(),
         data,
     )
+}
+
+fn random_data<R: Rng>(rng: &mut R, length: usize) -> Bytes {
+    let mut data = vec![0u8; length];
+    rng.fill(&mut data[..]);
+    data.into()
 }

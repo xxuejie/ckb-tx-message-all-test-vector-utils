@@ -76,47 +76,54 @@ static int cighash_all_generate(cighash_write_func_t writer, void* context) {
   /* Hash the first witness in specified format */
   {
     uint8_t buffer[CIGHASH_CKB_LOAD_BUFFER_SIZE];
-    uint32_t read_len = mol2_read_at(&first_witness.cur, buffer, 16);
-    if (read_len != 16) {
-      MOL2_PANIC(MOL2_ERR_DATA);
-      return MOL2_ERR_DATA;
-    }
-    err = writer(buffer, 16, context);
-    if (err != 0) {
-      return err;
-    }
-
-    mol2_cursor_t input_type = first_witness.t->input_type(&first_witness).cur;
-    uint32_t read = 0;
-    uint32_t total_size = input_type.size;
-    while (read < total_size) {
-      uint32_t current =
-          mol2_read_at(&input_type, buffer, CIGHASH_CKB_LOAD_BUFFER_SIZE);
-      ASSERT(current > 0);
-      err = writer(buffer, current, context);
+    {
+      uint32_t read_len = mol2_read_at(&first_witness.cur, buffer, 16);
+      if (read_len != 16) {
+        MOL2_PANIC(MOL2_ERR_DATA);
+        return MOL2_ERR_DATA;
+      }
+      err = writer(buffer, 16, context);
       if (err != 0) {
         return err;
       }
-      mol2_add_offset(&input_type, current);
-      mol2_sub_size(&input_type, current);
-      read += current;
     }
 
-    mol2_cursor_t output_type =
-        first_witness.t->output_type(&first_witness).cur;
-    read = 0;
-    total_size = input_type.size;
-    while (read < total_size) {
-      uint32_t current =
-          mol2_read_at(&output_type, buffer, CIGHASH_CKB_LOAD_BUFFER_SIZE);
-      ASSERT(current > 0);
-      err = writer(buffer, current, context);
-      if (err != 0) {
-        return err;
+    {
+      mol2_cursor_t input_type =
+          first_witness.t->input_type(&first_witness).cur;
+      uint32_t read = 0;
+      uint32_t total_size = input_type.size;
+      while (read < total_size) {
+        uint32_t current =
+            mol2_read_at(&input_type, buffer, CIGHASH_CKB_LOAD_BUFFER_SIZE);
+        ASSERT(current > 0);
+        err = writer(buffer, current, context);
+        if (err != 0) {
+          return err;
+        }
+        mol2_add_offset(&input_type, current);
+        mol2_sub_size(&input_type, current);
+        read += current;
       }
-      mol2_add_offset(&output_type, current);
-      mol2_sub_size(&output_type, current);
-      read += current;
+    }
+
+    {
+      mol2_cursor_t output_type =
+          first_witness.t->output_type(&first_witness).cur;
+      uint32_t read = 0;
+      uint32_t total_size = output_type.size;
+      while (read < total_size) {
+        uint32_t current =
+            mol2_read_at(&output_type, buffer, CIGHASH_CKB_LOAD_BUFFER_SIZE);
+        ASSERT(current > 0);
+        err = writer(buffer, current, context);
+        if (err != 0) {
+          return err;
+        }
+        mol2_add_offset(&output_type, current);
+        mol2_sub_size(&output_type, current);
+        read += current;
+      }
     }
   }
 

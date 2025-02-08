@@ -7,7 +7,8 @@ extern crate alloc;
 #[cfg(not(any(feature = "native-simulator", test)))]
 ckb_std::entry!(program_entry);
 #[cfg(not(any(feature = "native-simulator", test)))]
-ckb_std::default_alloc!();
+// A large heap is required if we want to load the witness as a whole
+ckb_std::default_alloc!(16384, 2097152, 64);
 
 use cighash_all_utils::cighash_all_in_ckb_vm::generate_cighash_all;
 use ckb_gen_types::{packed::WitnessArgsReader, prelude::*};

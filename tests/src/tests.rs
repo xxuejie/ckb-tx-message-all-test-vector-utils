@@ -30,6 +30,62 @@ proptest! {
 
 }
 
+fn _test_valid_tx_with_witness(contract_name: &str, seed: u64) {
+    let contract_bin: Bytes = Loader::default().load_binary(contract_name);
+    let success_bin: Bytes = Loader::default().load_binary("always-success");
+
+    let (context, tx) = build_tx_with_witness_data(contract_bin, success_bin, seed);
+
+    // run
+    let cycles = context
+        .verify_tx(&tx, 100_000_000)
+        .expect("pass verification");
+    println!("consume cycles: {}", cycles);
+}
+
+proptest! {
+    #[test]
+    fn test_c_assert_cighash_on_valid_tx_with_witness(seed: u64) {
+        _test_valid_tx_with_witness("c-assert-cighash", seed);
+    }
+
+    #[test]
+    fn test_rust_assert_cighash_on_valid_tx_with_witness(seed: u64) {
+        _test_valid_tx_with_witness("rust-assert-cighash", seed);
+    }
+}
+
+fn _test_valid_tx_with_super_large_data(contract_name: &str, seed: u64) {
+    let contract_bin: Bytes = Loader::default().load_binary(contract_name);
+    let success_bin: Bytes = Loader::default().load_binary("always-success");
+
+    let (context, tx) = build_tx_with_super_large_data(contract_bin, success_bin, seed);
+
+    // run
+    let cycles = context
+        .verify_tx(&tx, 100_000_000)
+        .expect("pass verification");
+    println!("consume cycles: {}", cycles);
+}
+
+proptest! {
+    // Tests with large data can be quite time-consuming, we are limiting the proptest
+    // runs here.
+    #![proptest_config(ProptestConfig {
+        cases: 30, .. ProptestConfig::default()
+    })]
+
+    #[test]
+    fn test_c_assert_cighash_on_valid_tx_with_super_large_data(seed: u64) {
+        _test_valid_tx_with_super_large_data("c-assert-cighash", seed);
+    }
+
+    #[test]
+    fn test_rust_assert_cighash_on_valid_tx_with_super_large_data(seed: u64) {
+        _test_valid_tx_with_super_large_data("rust-assert-cighash", seed);
+    }
+}
+
 fn _test_invalid_input_amount_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
