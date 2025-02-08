@@ -52,11 +52,11 @@ static int cighash_all_generate(cighash_write_func_t writer, void* context) {
   }
 
   /* Hash all input cells */
+  size_t input_cells = 0;
   {
-    size_t i = 0;
     while (1) {
-      err = _cighash_load_and_hash(ckb_load_cell, 0, i, CKB_SOURCE_INPUT,
-                                   writer, context);
+      err = _cighash_load_and_hash(ckb_load_cell, 0, input_cells,
+                                   CKB_SOURCE_INPUT, writer, context);
       if (err == CKB_INDEX_OUT_OF_BOUND) {
         break;
       }
@@ -64,12 +64,12 @@ static int cighash_all_generate(cighash_write_func_t writer, void* context) {
         return err;
       }
 
-      err = _cighash_load_and_hash(ckb_load_cell_data, 1, i, CKB_SOURCE_INPUT,
-                                   writer, context);
+      err = _cighash_load_and_hash(ckb_load_cell_data, 1, input_cells,
+                                   CKB_SOURCE_INPUT, writer, context);
       if (err != 0) {
         return err;
       }
-      i += 1;
+      input_cells += 1;
     }
   }
 
@@ -126,6 +126,23 @@ static int cighash_all_generate(cighash_write_func_t writer, void* context) {
     while (1) {
       err = _cighash_load_and_hash(ckb_load_witness, 1, i,
                                    CKB_SOURCE_GROUP_INPUT, writer, context);
+      if (err == CKB_INDEX_OUT_OF_BOUND) {
+        break;
+      }
+      if (err != 0) {
+        return err;
+      }
+      i += 1;
+    }
+  }
+
+  /* Hash the witnesses which do not have input cells of matching indices */
+  {
+    size_t i = input_cells;
+
+    while (1) {
+      err = _cighash_load_and_hash(ckb_load_witness, 1, i, CKB_SOURCE_INPUT,
+                                   writer, context);
       if (err == CKB_INDEX_OUT_OF_BOUND) {
         break;
       }

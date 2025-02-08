@@ -53,7 +53,10 @@ pub fn generate_cighash_all<W: io::Write>(writer: &mut W) -> Result<(), CighashA
         |index, source| load_initial(syscalls::load_cell_data, index, source),
         Source::Input,
     );
+    let mut input_cell_count = 0;
     for (initial_cell_output, initial_cell_data) in cell_output_iter.zip(cell_data_iter) {
+        input_cell_count += 1;
+
         load_and_hash(initial_cell_output, syscalls::load_cell, writer)?;
 
         write_length(initial_cell_data.full_length, writer)?;
@@ -103,6 +106,17 @@ pub fn generate_cighash_all<W: io::Write>(writer: &mut W) -> Result<(), CighashA
         Source::GroupInput,
     )
     .skip(1)
+    {
+        write_length(initial_witness.full_length, writer)?;
+        load_and_hash(initial_witness, syscalls::load_witness, writer)?;
+    }
+
+    // Hash witnesses which do not have input cells of matching indices
+    for initial_witness in QueryIter::new(
+        |index, source| load_initial(syscalls::load_witness, index, source),
+        Source::Input,
+    )
+    .skip(input_cell_count)
     {
         write_length(initial_witness.full_length, writer)?;
         load_and_hash(initial_witness, syscalls::load_witness, writer)?;

@@ -49,6 +49,7 @@ pub fn generate_cighash_all<W: io::Write>(
     script_or_index: ScriptOrIndex,
     writer: &mut W,
 ) -> Result<(), CighashAllError> {
+    assert_eq!(tx.raw().inputs().len(), inputs.len());
     let script_group_indices = find_script_group(inputs, script_or_index)?;
 
     // Ensure the first witness of current script group is a WitnessArgs
@@ -81,6 +82,17 @@ pub fn generate_cighash_all<W: io::Write>(
             write_length(witness.len(), writer)?;
             writer.write_all(&witness)?;
         }
+    }
+
+    // Hash witnesses that do not have input cells of the same indices
+    for witness in tx
+        .witnesses()
+        .into_iter()
+        .skip(tx.raw().inputs().len())
+        .map(|w| w.raw_data())
+    {
+        write_length(witness.len(), writer)?;
+        writer.write_all(&witness)?;
     }
 
     writer.flush()?;
