@@ -7,7 +7,7 @@ members = [
   # @@INSERTION_POINT@@
   "contracts/always-success",
   "contracts/rust-assert-cighash",
-  "crates/native-cighash-all-mock-tx-generator",
+  "crates/native-test-vector-generator",
   "crates/cighash-all-utils",
   "crates/test-utils",
   "tests",

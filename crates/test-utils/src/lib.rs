@@ -47,7 +47,7 @@ pub fn build_bare_tx(
     contract_bin: Bytes,
     always_success_bin: Bytes,
     seed: u64,
-) -> (Context, TransactionView) {
+) -> (Context, TransactionView, Vec<usize>) {
     let mut rng = StdRng::seed_from_u64(seed);
 
     _build_bare_tx(contract_bin, always_success_bin, &mut rng, 1, 5)
@@ -59,7 +59,7 @@ pub fn build_bare_tx_multiple_input_cells(
     contract_bin: Bytes,
     always_success_bin: Bytes,
     seed: u64,
-) -> (Context, TransactionView) {
+) -> (Context, TransactionView, Vec<usize>) {
     let mut rng = StdRng::seed_from_u64(seed);
 
     _build_bare_tx(contract_bin, always_success_bin, &mut rng, 3, 5)
@@ -71,7 +71,7 @@ pub fn build_tx_with_witness_data(
     contract_bin: Bytes,
     always_success_bin: Bytes,
     seed: u64,
-) -> (Context, TransactionView) {
+) -> (Context, TransactionView, Vec<usize>) {
     let mut rng = StdRng::seed_from_u64(seed);
 
     let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx_with_witness(
@@ -86,7 +86,7 @@ pub fn build_tx_with_witness_data(
 
     let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
 
-    (context, signed_tx)
+    (context, signed_tx, indices)
 }
 
 /// Build a proper transaction with 2 - 4 input cells
@@ -95,7 +95,7 @@ pub fn build_tx_with_super_large_data(
     contract_bin: Bytes,
     always_success_bin: Bytes,
     seed: u64,
-) -> (Context, TransactionView) {
+) -> (Context, TransactionView, Vec<usize>) {
     let mut rng = StdRng::seed_from_u64(seed);
 
     let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx_with_witness(
@@ -128,7 +128,7 @@ pub fn build_tx_with_super_large_data(
 
     let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
 
-    (context, signed_tx)
+    (context, signed_tx, indices)
 }
 
 fn _build_bare_tx<R: Rng>(
@@ -137,7 +137,7 @@ fn _build_bare_tx<R: Rng>(
     rng: &mut R,
     min_current_group_input_cells: usize,
     max_current_group_input_cells: usize,
-) -> (Context, TransactionView) {
+) -> (Context, TransactionView, Vec<usize>) {
     let (mut context, uncompleted_tx, indices) = _build_bare_uncompleted_tx(
         contract_bin,
         always_success_bin,
@@ -148,7 +148,7 @@ fn _build_bare_tx<R: Rng>(
 
     let signed_tx = complete_and_sign_tx(&mut context, uncompleted_tx, indices[0]);
 
-    (context, signed_tx)
+    (context, signed_tx, indices)
 }
 
 fn _build_bare_uncompleted_tx_with_witness<R: Rng>(

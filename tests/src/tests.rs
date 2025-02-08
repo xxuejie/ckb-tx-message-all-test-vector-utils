@@ -2,13 +2,14 @@ use crate::Loader;
 use ckb_testtool::ckb_types::{bytes::Bytes, core::TransactionBuilder, packed::*, prelude::*};
 use ckb_testtool::context::Context;
 use proptest::prelude::*;
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use test_utils::*;
 
 fn _test_valid_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (context, tx) = build_bare_tx(contract_bin, success_bin, seed);
+    let (context, tx, _) = build_bare_tx(contract_bin, success_bin, seed);
 
     // run
     let cycles = context
@@ -34,7 +35,7 @@ fn _test_valid_tx_with_witness(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (context, tx) = build_tx_with_witness_data(contract_bin, success_bin, seed);
+    let (context, tx, _) = build_tx_with_witness_data(contract_bin, success_bin, seed);
 
     // run
     let cycles = context
@@ -59,7 +60,7 @@ fn _test_valid_tx_with_super_large_data(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (context, tx) = build_tx_with_super_large_data(contract_bin, success_bin, seed);
+    let (context, tx, _) = build_tx_with_super_large_data(contract_bin, success_bin, seed);
 
     // run
     let cycles = context
@@ -86,11 +87,11 @@ proptest! {
     }
 }
 
-fn _test_invalid_input_amount_bare_tx(contract_name: &str, seed: u64) {
+fn _test_unsigned_input_amount_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (mut context, tx) = build_bare_tx(contract_bin, success_bin, seed);
+    let (mut context, tx, _) = build_bare_tx(contract_bin, success_bin, seed);
 
     // Modify the CKBytes of one particular input cell
     {
@@ -114,22 +115,22 @@ fn _test_invalid_input_amount_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_invalid_input_amount_bare_tx(seed: u64) {
-        _test_invalid_input_amount_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_cighash_on_unsigned_input_amount_bare_tx(seed: u64) {
+        _test_unsigned_input_amount_bare_tx("rust-assert-cighash", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_invalid_input_amount_bare_tx(seed: u64) {
-        _test_invalid_input_amount_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_cighash_on_unsigned_input_amount_bare_tx(seed: u64) {
+        _test_unsigned_input_amount_bare_tx("c-assert-cighash", seed);
     }
 
 }
 
-fn _test_invalid_input_cell_data_bare_tx(contract_name: &str, seed: u64) {
+fn _test_unsigned_input_cell_data_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (mut context, tx) = build_bare_tx(contract_bin, success_bin, seed);
+    let (mut context, tx, _) = build_bare_tx(contract_bin, success_bin, seed);
 
     // Modify the cell data of one particular input cell
     {
@@ -152,21 +153,21 @@ fn _test_invalid_input_cell_data_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_invalid_input_cell_data_bare_tx(seed: u64) {
-        _test_invalid_input_cell_data_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_cighash_on_unsigned_input_cell_data_bare_tx(seed: u64) {
+        _test_unsigned_input_cell_data_bare_tx("rust-assert-cighash", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_invalid_input_cell_data_bare_tx(seed: u64) {
-        _test_invalid_input_cell_data_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_cighash_on_unsigned_input_cell_data_bare_tx(seed: u64) {
+        _test_unsigned_input_cell_data_bare_tx("c-assert-cighash", seed);
     }
 }
 
-fn _test_invalid_tx_data_bare_tx(contract_name: &str, seed: u64) {
+fn _test_unsigned_tx_data_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (context, tx) = build_bare_tx(contract_bin, success_bin, seed);
+    let (context, tx, _) = build_bare_tx(contract_bin, success_bin, seed);
 
     // Modify one particular output cell so tx changes
     let tx = {
@@ -181,21 +182,21 @@ fn _test_invalid_tx_data_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_invalid_tx_data_bare_tx(seed: u64) {
-        _test_invalid_tx_data_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_cighash_on_unsigned_tx_data_bare_tx(seed: u64) {
+        _test_unsigned_tx_data_bare_tx("rust-assert-cighash", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_invalid_tx_data_bare_tx(seed: u64) {
-        _test_invalid_tx_data_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_cighash_on_unsigned_tx_data_bare_tx(seed: u64) {
+        _test_unsigned_tx_data_bare_tx("c-assert-cighash", seed);
     }
 }
 
-fn _test_cighash_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
+fn _test_cighash_on_appended_witness_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
-    let (context, tx) = build_bare_tx_multiple_input_cells(contract_bin, success_bin, seed);
+    let (context, tx, _) = build_bare_tx_multiple_input_cells(contract_bin, success_bin, seed);
 
     // Add more witnesses than originally planned
     let tx = {
@@ -208,6 +209,46 @@ fn _test_cighash_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
             builder = builder.witness(Bytes::new().pack());
         }
         builder.build()
+    };
+
+    // run to a failure
+    context.verify_tx(&tx, 10_000_000).unwrap_err();
+}
+
+proptest! {
+    #[test]
+    fn test_rust_assert_cighash_on_appended_witness_bare_tx(seed: u64) {
+        _test_cighash_on_appended_witness_bare_tx("rust-assert-cighash", seed);
+    }
+
+    #[test]
+    fn test_c_assert_cighash_on_appended_witness_bare_tx(seed: u64) {
+        _test_cighash_on_appended_witness_bare_tx("c-assert-cighash", seed);
+    }
+}
+
+fn _test_cighash_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
+    let contract_bin: Bytes = Loader::default().load_binary(contract_name);
+    let success_bin: Bytes = Loader::default().load_binary("always-success");
+
+    let (context, tx, indices) = build_bare_tx(contract_bin, success_bin, seed);
+
+    // Flip one of the first 128 bits(16 bytes) of the last witness,
+    // which contains a WitnessArgs structure
+    let tx = {
+        let mut witnesses: Vec<_> = tx.witnesses().into_iter().collect();
+        let mut last_witness = witnesses[indices[0]].raw_data().to_vec();
+
+        let mut rng = StdRng::seed_from_u64(seed.wrapping_add(1));
+        let byte_index = rng.gen_range(0..16);
+        let bit_index = rng.gen_range(0..8);
+
+        last_witness[byte_index] ^= 1 << bit_index;
+
+        let last_witness: Bytes = last_witness.into();
+        witnesses[indices[0]] = last_witness.pack();
+
+        tx.as_advanced_builder().set_witnesses(witnesses).build()
     };
 
     // run to a failure
