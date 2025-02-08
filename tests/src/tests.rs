@@ -2,7 +2,7 @@ use crate::Loader;
 use ckb_testtool::ckb_types::{bytes::Bytes, core::TransactionBuilder, packed::*, prelude::*};
 use ckb_testtool::context::Context;
 use proptest::prelude::*;
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use test_utils::*;
 
 fn _test_valid_bare_tx(contract_name: &str, seed: u64) {
