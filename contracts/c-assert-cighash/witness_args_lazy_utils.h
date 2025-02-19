@@ -26,6 +26,22 @@
 #include <ckb_syscalls.h>
 #include <molecule/blockchain-api2.h>
 
+void mol2_advance(mol2_cursor_t *cursor, uint32_t len) {
+  mol2_add_offset(cursor, len);
+  mol2_sub_size(cursor, len);
+}
+
+int mol2_read_and_advance(mol2_cursor_t *cursor, uint8_t *buffer,
+                          uint32_t read_len) {
+  uint32_t out_len = mol2_read_at(cursor, buffer, read_len);
+  if (out_len != read_len) {
+    MOL2_PANIC(MOL2_ERR_DATA);
+  }
+  mol2_advance(cursor, read_len);
+
+  return MOL2_OK;
+}
+
 mol2_errno mol2_lazy_fixvec_verify(const mol2_cursor_t *cursor,
                                    mol2_num_t item_size) {
   if (cursor->size < MOL2_NUM_T_SIZE) {
@@ -76,10 +92,8 @@ mol2_errno mol2_lazy_witness_args_verify(const WitnessArgsType *input,
   if (input->cur.size < MOL2_NUM_T_SIZE * 2) {
     return MOL2_ERR_HEADER;
   }
-  {
-    mol2_add_offset(&ptr_cursor, MOL2_NUM_T_SIZE);
-    mol2_sub_size(&ptr_cursor, MOL2_NUM_T_SIZE);
-  }
+  mol2_advance(&ptr_cursor, MOL2_NUM_T_SIZE);
+
   mol2_num_t offset = mol2_unpack_number(&ptr_cursor);
   if (offset % 4 > 0 || offset < MOL2_NUM_T_SIZE * 2) {
     return MOL2_ERR_OFFSET;
@@ -98,10 +112,8 @@ mol2_errno mol2_lazy_witness_args_verify(const WitnessArgsType *input,
   mol2_num_t offsets[field_count + 1];
   offsets[0] = offset;
   for (mol2_num_t i = 1; i < field_count; i++) {
-    {
-      mol2_add_offset(&ptr_cursor, MOL2_NUM_T_SIZE);
-      mol2_sub_size(&ptr_cursor, MOL2_NUM_T_SIZE);
-    }
+    mol2_advance(&ptr_cursor, MOL2_NUM_T_SIZE);
+
     offsets[i] = mol2_unpack_number(&ptr_cursor);
     if (offsets[i - 1] > offsets[i]) {
       return MOL2_ERR_OFFSET;

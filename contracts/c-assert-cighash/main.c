@@ -2,7 +2,7 @@
 
 #include <blake2b.h>
 
-#include "cighash_all.h"
+#include "ckb_tx_message_all.h"
 
 #define WITNESS_BUFFER_SIZE (1024 * 32)
 
@@ -16,7 +16,7 @@ int main() {
   blake2b_state state;
   ckb_blake2b_init(&state, 32);
 
-  int err = cighash_all_generate(write_to_blake2b, &state);
+  int err = ckb_tx_message_all_generate(write_to_blake2b, &state);
   if (err != 0) {
     ckb_printf("CIGHASH_ALL encounters error: %d\n", err);
     return 99;
