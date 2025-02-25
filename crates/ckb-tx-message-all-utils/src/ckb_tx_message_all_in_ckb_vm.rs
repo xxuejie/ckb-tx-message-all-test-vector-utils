@@ -10,32 +10,34 @@ use molecule::error::VerificationError;
 
 #[derive(Debug)]
 #[allow(dead_code)]
-pub enum CighashAllError {
+pub enum CkbTxMessageAllError {
     Witness(VerificationError),
     Syscall(SysError),
     Io(io::Error),
 }
 
-impl From<VerificationError> for CighashAllError {
+impl From<VerificationError> for CkbTxMessageAllError {
     fn from(e: VerificationError) -> Self {
-        CighashAllError::Witness(e)
+        CkbTxMessageAllError::Witness(e)
     }
 }
 
-impl From<SysError> for CighashAllError {
+impl From<SysError> for CkbTxMessageAllError {
     fn from(e: SysError) -> Self {
-        CighashAllError::Syscall(e)
+        CkbTxMessageAllError::Syscall(e)
     }
 }
 
-impl From<io::Error> for CighashAllError {
+impl From<io::Error> for CkbTxMessageAllError {
     fn from(e: io::Error) -> Self {
-        CighashAllError::Io(e)
+        CkbTxMessageAllError::Io(e)
     }
 }
 
-pub fn generate_cighash_all<W: io::Write>(writer: &mut W) -> Result<(), CighashAllError> {
-    // NOTE: while the first step in CIGHASH_ALL's specification is to validate
+pub fn generate_ckb_tx_message_all<W: io::Write>(
+    writer: &mut W,
+) -> Result<(), CkbTxMessageAllError> {
+    // NOTE: while the first step in CKB_TX_MESSAGE_ALL's specification is to validate
     // the format of the first witness in current script group, the actual validation
     // code is shifted to a later stage due to certain reasons we will explain later.
     // The actual semantics stay the same, an invalid witness would still generate an
@@ -157,7 +159,7 @@ fn load_and_hash<W, F>(
     initial: InitialLoadData,
     load_fn: F,
     writer: &mut W,
-) -> Result<(), CighashAllError>
+) -> Result<(), CkbTxMessageAllError>
 where
     W: io::Write,
     F: Fn(&mut [u8], usize, usize, Source) -> Result<usize, SysError>,
@@ -195,7 +197,7 @@ where
 }
 
 #[inline]
-fn write_length<W>(length: usize, writer: &mut W) -> Result<(), CighashAllError>
+fn write_length<W>(length: usize, writer: &mut W) -> Result<(), CkbTxMessageAllError>
 where
     W: io::Write,
 {

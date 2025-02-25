@@ -1,5 +1,5 @@
 [package]
-name = "cighash-all-utils"
+name = "ckb-tx-message-all-utils"
 version = "0.1.0"
 edition = "2021"
 

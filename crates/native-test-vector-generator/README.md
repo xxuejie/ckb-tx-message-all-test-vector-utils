@@ -1,14 +1,14 @@
 # native-test-vector-generator
 
-A utility to generate test vectors for `CIGHASH_ALL` standard.
+A utility to generate test vectors for `CKB_TX_MESSAGE_ALL` standard.
 
 ## Usage
 
 Use the following command to setup the tool:
 
 ```bash
-$ git clone --recursive https://github.com/xxuejie/cighash-all-test-vector-utils
-$ cd cighash-all-test-vector-utils
+$ git clone --recursive https://github.com/xxuejie/ckb-tx-message-all-test-vector-utils
+$ cd ckb-tx-message-all-test-vector-utils
 $ make build
 ```
 
@@ -103,12 +103,12 @@ total 19M
 Each different file name minus the file extension part represents a different test case. For each test case, 2 or 3 files will be generated:
 
 * `.json` suffix: a JSON file containing mock transaction in a format that will be accepted by [ckb-debugger](https://github.com/nervosnetwork/ckb-standalone-debugger).
-* `.indices` suffix: a JSON file containing indices for input cells that use a `CIGHASH_ALL` validating lock
-* `.hash` suffix: an optional file, in the case a `CIGHASH_ALL` hash could be generated, this contains a 32-byte hash in hex notation, which is the `CIGHASH_ALL` generated from the JSON tx file of the same name, using the indices file of the same name as the specified script group, and using ckb flavored blake2b hash function as the hasher. In case a `CIGHASH_ALL` hash could not be generated(e.g., the first witness in current script group is not WitnessArgs structure), this file will be missing.
+* `.indices` suffix: a JSON file containing indices for input cells that use a `CKB_TX_MESSAGE_ALL` validating lock
+* `.hash` suffix: an optional file, in the case a `CKB_TX_MESSAGE_ALL` hash could be generated, this contains a 32-byte hash in hex notation, which is the `CKB_TX_MESSAGE_ALL` generated from the JSON tx file of the same name, using the indices file of the same name as the specified script group, and using ckb flavored blake2b hash function as the hasher. In case a `CKB_TX_MESSAGE_ALL` hash could not be generated(e.g., the first witness in current script group is not WitnessArgs structure), this file will be missing.
 
-For example, `witness-tx-batch10.hash` contains the `CIGHASH_ALL` hash generated for the tx file `witness-tx-batch10.json`, using input cells denoted in `witness-tx-batch10.indices` as the current script group. CKB flavored blake2b hash(meaning blake2b's personalization is set to `ckb-default-hash`) is used to calculate the final hash.
+For example, `witness-tx-batch10.hash` contains the `CKB_TX_MESSAGE_ALL` hash generated for the tx file `witness-tx-batch10.json`, using input cells denoted in `witness-tx-batch10.indices` as the current script group. CKB flavored blake2b hash(meaning blake2b's personalization is set to `ckb-default-hash`) is used to calculate the final hash.
 
-On the other hand, `invalid-witness-tx-batch3.json` represents a different CKB transaction, which has no valid `CIGHASH_ALL` hash using inputs cells denoted in `invalid-witness-tx-batch3.indices` as the current script group.
+On the other hand, `invalid-witness-tx-batch3.json` represents a different CKB transaction, which has no valid `CKB_TX_MESSAGE_ALL` hash using inputs cells denoted in `invalid-witness-tx-batch3.indices` as the current script group.
 
 One can also specify the seed to use for deterministic generation:
 

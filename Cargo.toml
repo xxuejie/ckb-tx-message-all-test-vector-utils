@@ -6,9 +6,9 @@ members = [
   # detect insertion point for newly generated crates.
   # @@INSERTION_POINT@@
   "contracts/always-success",
-  "contracts/rust-assert-cighash",
+  "contracts/rust-assert-ckb-tx-message-all",
   "crates/native-test-vector-generator",
-  "crates/cighash-all-utils",
+  "crates/ckb-tx-message-all-utils",
   "crates/test-utils",
   "tests",
 ]

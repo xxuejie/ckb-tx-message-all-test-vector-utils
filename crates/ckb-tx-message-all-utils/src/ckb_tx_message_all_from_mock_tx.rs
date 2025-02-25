@@ -9,22 +9,22 @@ use std::io;
 
 #[derive(Debug)]
 #[allow(dead_code)]
-pub enum CighashAllError {
+pub enum CkbTxMessageAllError {
     InvalidMockTx,
     UnknownScriptGroup,
     Witness(VerificationError),
     Io(io::Error),
 }
 
-impl From<VerificationError> for CighashAllError {
+impl From<VerificationError> for CkbTxMessageAllError {
     fn from(e: VerificationError) -> Self {
-        CighashAllError::Witness(e)
+        CkbTxMessageAllError::Witness(e)
     }
 }
 
-impl From<io::Error> for CighashAllError {
+impl From<io::Error> for CkbTxMessageAllError {
     fn from(e: io::Error) -> Self {
-        CighashAllError::Io(e)
+        CkbTxMessageAllError::Io(e)
     }
 }
 
@@ -34,21 +34,21 @@ pub enum ScriptOrIndex {
     Index(usize),
 }
 
-pub fn generate_cighash_all_from_mock_tx<W: io::Write>(
+pub fn generate_ckb_tx_message_all_from_mock_tx<W: io::Write>(
     mock_tx: &MockTransaction,
     script_or_index: ScriptOrIndex,
     writer: &mut W,
-) -> Result<(), CighashAllError> {
+) -> Result<(), CkbTxMessageAllError> {
     let inputs = locate_inputs(mock_tx)?;
-    generate_cighash_all(&mock_tx.tx, &inputs, script_or_index, writer)
+    generate_ckb_tx_message_all(&mock_tx.tx, &inputs, script_or_index, writer)
 }
 
-pub fn generate_cighash_all<W: io::Write>(
+pub fn generate_ckb_tx_message_all<W: io::Write>(
     tx: &Transaction,
     inputs: &[(CellOutput, Bytes)],
     script_or_index: ScriptOrIndex,
     writer: &mut W,
-) -> Result<(), CighashAllError> {
+) -> Result<(), CkbTxMessageAllError> {
     assert_eq!(tx.raw().inputs().len(), inputs.len());
     let script_group_indices = find_script_group(inputs, script_or_index)?;
 
@@ -56,7 +56,7 @@ pub fn generate_cighash_all<W: io::Write>(
     let first_witness_content = tx
         .witnesses()
         .get(script_group_indices[0])
-        .ok_or(CighashAllError::InvalidMockTx)?
+        .ok_or(CkbTxMessageAllError::InvalidMockTx)?
         .raw_data();
     let first_witness = WitnessArgsReader::from_slice(&first_witness_content)?;
 
@@ -99,7 +99,9 @@ pub fn generate_cighash_all<W: io::Write>(
     Ok(())
 }
 
-fn locate_inputs(mock_tx: &MockTransaction) -> Result<Vec<(CellOutput, Bytes)>, CighashAllError> {
+fn locate_inputs(
+    mock_tx: &MockTransaction,
+) -> Result<Vec<(CellOutput, Bytes)>, CkbTxMessageAllError> {
     let mut result = Vec::with_capacity(mock_tx.tx.raw().inputs().len());
     for input in mock_tx.tx.raw().inputs() {
         let mock_input = mock_tx
@@ -107,7 +109,7 @@ fn locate_inputs(mock_tx: &MockTransaction) -> Result<Vec<(CellOutput, Bytes)>, 
             .inputs
             .iter()
             .find(|mock_input| mock_input.input == input)
-            .ok_or(CighashAllError::InvalidMockTx)?;
+            .ok_or(CkbTxMessageAllError::InvalidMockTx)?;
         result.push((mock_input.output.clone(), mock_input.data.clone()));
     }
     Ok(result)
@@ -116,12 +118,12 @@ fn locate_inputs(mock_tx: &MockTransaction) -> Result<Vec<(CellOutput, Bytes)>, 
 fn find_script_group(
     inputs: &[(CellOutput, Bytes)],
     script_or_index: ScriptOrIndex,
-) -> Result<Vec<usize>, CighashAllError> {
+) -> Result<Vec<usize>, CkbTxMessageAllError> {
     let script = match script_or_index {
         ScriptOrIndex::Script(script) => script,
         ScriptOrIndex::Index(i) => inputs
             .get(i)
-            .ok_or(CighashAllError::UnknownScriptGroup)?
+            .ok_or(CkbTxMessageAllError::UnknownScriptGroup)?
             .0
             .lock(),
     };
@@ -132,13 +134,13 @@ fn find_script_group(
         .map(|(i, _)| i)
         .collect();
     if indices.is_empty() {
-        return Err(CighashAllError::UnknownScriptGroup);
+        return Err(CkbTxMessageAllError::UnknownScriptGroup);
     }
     Ok(indices)
 }
 
 #[inline]
-fn write_length<W>(length: usize, writer: &mut W) -> Result<(), CighashAllError>
+fn write_length<W>(length: usize, writer: &mut W) -> Result<(), CkbTxMessageAllError>
 where
     W: io::Write,
 {

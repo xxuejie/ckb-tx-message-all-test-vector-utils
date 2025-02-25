@@ -10,11 +10,11 @@ ckb_std::entry!(program_entry);
 // A large heap is required if we want to load the witness as a whole
 ckb_std::default_alloc!(16384, 2097152, 64);
 
-use cighash_all_utils::cighash_all_in_ckb_vm::generate_cighash_all;
 use ckb_gen_types::{packed::WitnessArgsReader, prelude::*};
 use ckb_hash::{new_blake2b, Blake2b};
 use ckb_rust_std::io;
 use ckb_std::{ckb_constants::Source, high_level};
+use ckb_tx_message_all_utils::ckb_tx_message_all_in_ckb_vm::generate_ckb_tx_message_all;
 
 pub struct Hasher(Blake2b);
 
@@ -45,8 +45,8 @@ impl io::Write for Hasher {
 
 pub fn program_entry() -> i8 {
     let mut hasher = Hasher::default();
-    if let Err(e) = generate_cighash_all(&mut hasher) {
-        ckb_std::debug!("Generate CIGHASH_ALL encounters error: {:?}", e);
+    if let Err(e) = generate_ckb_tx_message_all(&mut hasher) {
+        ckb_std::debug!("Generate CKB_TX_MESSAGE_ALL encounters error: {:?}", e);
         return 99;
     }
     let hash = hasher.hash();

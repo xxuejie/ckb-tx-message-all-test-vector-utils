@@ -20,13 +20,13 @@ fn _test_valid_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_valid_bare_tx(seed: u64) {
-        _test_valid_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_valid_bare_tx(seed: u64) {
+        _test_valid_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_valid_bare_tx(seed: u64) {
-        _test_valid_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_valid_bare_tx(seed: u64) {
+        _test_valid_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 
 }
@@ -46,13 +46,13 @@ fn _test_valid_tx_with_witness(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_c_assert_cighash_on_valid_tx_with_witness(seed: u64) {
-        _test_valid_tx_with_witness("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_valid_tx_with_witness(seed: u64) {
+        _test_valid_tx_with_witness("c-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_rust_assert_cighash_on_valid_tx_with_witness(seed: u64) {
-        _test_valid_tx_with_witness("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_valid_tx_with_witness(seed: u64) {
+        _test_valid_tx_with_witness("rust-assert-ckb-tx-message-all", seed);
     }
 }
 
@@ -77,13 +77,13 @@ proptest! {
     })]
 
     #[test]
-    fn test_c_assert_cighash_on_valid_tx_with_super_large_data(seed: u64) {
-        _test_valid_tx_with_super_large_data("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_valid_tx_with_super_large_data(seed: u64) {
+        _test_valid_tx_with_super_large_data("c-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_rust_assert_cighash_on_valid_tx_with_super_large_data(seed: u64) {
-        _test_valid_tx_with_super_large_data("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_valid_tx_with_super_large_data(seed: u64) {
+        _test_valid_tx_with_super_large_data("rust-assert-ckb-tx-message-all", seed);
     }
 }
 
@@ -115,13 +115,13 @@ fn _test_unsigned_input_amount_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_unsigned_input_amount_bare_tx(seed: u64) {
-        _test_unsigned_input_amount_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_unsigned_input_amount_bare_tx(seed: u64) {
+        _test_unsigned_input_amount_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_unsigned_input_amount_bare_tx(seed: u64) {
-        _test_unsigned_input_amount_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_unsigned_input_amount_bare_tx(seed: u64) {
+        _test_unsigned_input_amount_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 
 }
@@ -153,13 +153,13 @@ fn _test_unsigned_input_cell_data_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_unsigned_input_cell_data_bare_tx(seed: u64) {
-        _test_unsigned_input_cell_data_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_unsigned_input_cell_data_bare_tx(seed: u64) {
+        _test_unsigned_input_cell_data_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_unsigned_input_cell_data_bare_tx(seed: u64) {
-        _test_unsigned_input_cell_data_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_unsigned_input_cell_data_bare_tx(seed: u64) {
+        _test_unsigned_input_cell_data_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 }
 
@@ -182,17 +182,17 @@ fn _test_unsigned_tx_data_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_unsigned_tx_data_bare_tx(seed: u64) {
-        _test_unsigned_tx_data_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_unsigned_tx_data_bare_tx(seed: u64) {
+        _test_unsigned_tx_data_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_unsigned_tx_data_bare_tx(seed: u64) {
-        _test_unsigned_tx_data_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_unsigned_tx_data_bare_tx(seed: u64) {
+        _test_unsigned_tx_data_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 }
 
-fn _test_cighash_on_appended_witness_bare_tx(contract_name: &str, seed: u64) {
+fn _test_ckb_tx_message_on_appended_witness_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
@@ -217,17 +217,17 @@ fn _test_cighash_on_appended_witness_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_appended_witness_bare_tx(seed: u64) {
-        _test_cighash_on_appended_witness_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_appended_witness_bare_tx(seed: u64) {
+        _test_ckb_tx_message_on_appended_witness_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_appended_witness_bare_tx(seed: u64) {
-        _test_cighash_on_appended_witness_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_appended_witness_bare_tx(seed: u64) {
+        _test_ckb_tx_message_on_appended_witness_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 }
 
-fn _test_cighash_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
+fn _test_ckb_tx_message_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
     let contract_bin: Bytes = Loader::default().load_binary(contract_name);
     let success_bin: Bytes = Loader::default().load_binary("always-success");
 
@@ -257,13 +257,13 @@ fn _test_cighash_on_invalid_witness_bare_tx(contract_name: &str, seed: u64) {
 
 proptest! {
     #[test]
-    fn test_rust_assert_cighash_on_invalid_witness_bare_tx(seed: u64) {
-        _test_cighash_on_invalid_witness_bare_tx("rust-assert-cighash", seed);
+    fn test_rust_assert_ckb_tx_message_on_invalid_witness_bare_tx(seed: u64) {
+        _test_ckb_tx_message_on_invalid_witness_bare_tx("rust-assert-ckb-tx-message-all", seed);
     }
 
     #[test]
-    fn test_c_assert_cighash_on_invalid_witness_bare_tx(seed: u64) {
-        _test_cighash_on_invalid_witness_bare_tx("c-assert-cighash", seed);
+    fn test_c_assert_ckb_tx_message_on_invalid_witness_bare_tx(seed: u64) {
+        _test_ckb_tx_message_on_invalid_witness_bare_tx("c-assert-ckb-tx-message-all", seed);
     }
 }
 

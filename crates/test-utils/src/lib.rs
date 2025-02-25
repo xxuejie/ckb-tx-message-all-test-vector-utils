@@ -1,6 +1,3 @@
-use cighash_all_utils::cighash_all_from_mock_tx::{
-    generate_cighash_all_from_mock_tx, ScriptOrIndex,
-};
 use ckb_testtool::{
     ckb_hash::{new_blake2b, Blake2b},
     ckb_types::{
@@ -10,6 +7,9 @@ use ckb_testtool::{
         prelude::*,
     },
     context::Context,
+};
+use ckb_tx_message_all_utils::ckb_tx_message_all_from_mock_tx::{
+    generate_ckb_tx_message_all_from_mock_tx, ScriptOrIndex,
 };
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use std::io;
@@ -290,25 +290,25 @@ fn complete_and_sign_tx(
 ) -> TransactionView {
     let unsigned_tx = context.complete_tx(uncompleted_tx);
 
-    let cighash = {
+    let ckb_tx_message = {
         let unsigned_mock_tx = context.dump_tx(&unsigned_tx).expect("dump tx");
         let mut hasher = Hasher::default();
-        generate_cighash_all_from_mock_tx(
+        generate_ckb_tx_message_all_from_mock_tx(
             &unsigned_mock_tx.into(),
             ScriptOrIndex::Index(first_witness_index),
             &mut hasher,
         )
-        .expect("generate cighash all");
+        .expect("generate ckb tx message all");
         hasher.hash()
     };
 
-    // Use cighash to replace the placeholder part in unsigned transaction
+    // Use ckb_tx_message to replace the placeholder part in unsigned transaction
     let mut witnesses: Vec<_> = unsigned_tx.witnesses().into_iter().collect();
     let first_witness =
         WitnessArgs::from_slice(&witnesses[first_witness_index].raw_data()).unwrap();
     witnesses[first_witness_index] = first_witness
         .as_builder()
-        .lock(Some(Bytes::from(cighash.to_vec())).pack())
+        .lock(Some(Bytes::from(ckb_tx_message.to_vec())).pack())
         .build()
         .as_bytes()
         .pack();

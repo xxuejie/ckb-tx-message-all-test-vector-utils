@@ -1,9 +1,9 @@
-use cighash_all_utils::cighash_all_from_mock_tx::{
-    generate_cighash_all_from_mock_tx, ScriptOrIndex,
-};
 use ckb_testtool::{
     ckb_types::{bytes::Bytes, core::TransactionView, prelude::*},
     context::Context,
+};
+use ckb_tx_message_all_utils::ckb_tx_message_all_from_mock_tx::{
+    generate_ckb_tx_message_all_from_mock_tx, ScriptOrIndex,
 };
 use clap::{Parser, ValueEnum};
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -42,8 +42,8 @@ struct Cli {
     #[arg(long)]
     output: String,
 
-    /// Cighash contract
-    #[arg(long, default_value = "./build/release/rust-assert-cighash")]
+    /// CKB_TX_MESSAGE contract
+    #[arg(long, default_value = "./build/release/rust-assert-ckb-tx-message-all")]
     contract: String,
 
     /// Always success contract
@@ -185,18 +185,18 @@ fn save_tx(context: Context, tx: TransactionView, indices: Vec<usize>, path: &Pa
         serde_json::to_string_pretty(&indices).expect("to json"),
     )
     .expect("write index file");
-    // Save cighash if possible
+    // Save message if possible
     {
         let mut hasher = Hasher::default();
-        if generate_cighash_all_from_mock_tx(
+        if generate_ckb_tx_message_all_from_mock_tx(
             &mock_tx.clone().into(),
             ScriptOrIndex::Index(indices[0]),
             &mut hasher,
         )
         .is_ok()
         {
-            let cighash: Bytes = hasher.hash().to_vec().into();
-            fs::write(format!("{}.hash", path), format!("{:x}", cighash)).expect("write cighash");
+            let hash: Bytes = hasher.hash().to_vec().into();
+            fs::write(format!("{}.hash", path), format!("{:x}", hash)).expect("write hash");
         }
     }
 }

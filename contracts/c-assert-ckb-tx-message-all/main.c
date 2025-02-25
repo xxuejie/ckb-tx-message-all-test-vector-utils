@@ -18,13 +18,14 @@ int main() {
 
   int err = ckb_tx_message_all_generate(write_to_blake2b, &state);
   if (err != 0) {
-    ckb_printf("CIGHASH_ALL encounters error: %d\n", err);
+    ckb_printf("CKB_TX_MESSAGE_ALL encounters error: %d\n", err);
     return 99;
   }
 
   uint8_t first_witness_buffer[MOL2_DATA_SOURCE_LEN(WITNESS_BUFFER_SIZE)];
   WitnessArgsType first_witness;
-  /* We can skip the validation since CIGHASH_ALL process takes care of it */
+  /* We can skip the validation since CKB_TX_MESSAGE_ALL process takes care of
+   * it */
   err =
       mol2_lazy_witness_args_load(first_witness_buffer, WITNESS_BUFFER_SIZE, 0,
                                   CKB_SOURCE_GROUP_INPUT, 0, &first_witness);
@@ -58,7 +59,7 @@ int main() {
   blake2b_final(&state, actual, 32);
 
   if (memcmp(actual, expected, 32) != 0) {
-    ckb_printf("CIGHASH_ALL does not match!\n");
+    ckb_printf("CKB_TX_MESSAGE_ALL does not match!\n");
     return -1;
   }
 

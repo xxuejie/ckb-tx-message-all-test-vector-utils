@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 ckb-testtool = "0.14.1"
-cighash-all-utils = { path = "../cighash-all-utils", features = ["std"] }
+ckb-tx-message-all-utils = { path = "../ckb-tx-message-all-utils", features = ["std"] }
 test-utils = { path = "../test-utils" }
 clap = { version = "4.5.28", features = ["cargo", "derive"] }
 rand = "0.8.5"

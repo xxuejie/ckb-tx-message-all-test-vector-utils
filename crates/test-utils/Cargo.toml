@@ -6,5 +6,5 @@ edition = "2021"
 [dependencies]
 ckb-testtool = "0.14.1"
 ckb-mock-tx-types = "0.119.0"
-cighash-all-utils = { path = "../cighash-all-utils", features = ["std"] }
+ckb-tx-message-all-utils = { path = "../ckb-tx-message-all-utils", features = ["std"] }
 rand = "0.8.5"

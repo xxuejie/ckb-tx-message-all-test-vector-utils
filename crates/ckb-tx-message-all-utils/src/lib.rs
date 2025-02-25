@@ -4,5 +4,5 @@
 extern crate alloc;
 
 #[cfg(feature = "std")]
-pub mod cighash_all_from_mock_tx;
-pub mod cighash_all_in_ckb_vm;
+pub mod ckb_tx_message_all_from_mock_tx;
+pub mod ckb_tx_message_all_in_ckb_vm;
