@@ -95,6 +95,7 @@ cargo:
 
 clean:
 	rm -rf build
+	rm -rf contracts/c-*/c-*
 	cargo clean
 
 TEMPLATE_TYPE := --git
