@@ -97,8 +97,9 @@ pub fn generate_ckb_tx_message_all<W: io::Write>(
         let first_witness_data = high_level::load_witness(0, Source::GroupInput)?;
         let first_witness = WitnessArgsReader::from_slice(&first_witness_data)?;
 
-        writer.write_all(&first_witness.as_slice()[0..16])?;
+        write_length(first_witness.input_type().as_slice().len(), writer)?;
         writer.write_all(first_witness.input_type().as_slice())?;
+        write_length(first_witness.output_type().as_slice().len(), writer)?;
         writer.write_all(first_witness.output_type().as_slice())?;
     }
 
